@@ -1,0 +1,201 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Blogging App API",
+      "version": "1.0.0",
+      "description": "API documentation for the blogging app"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000/api",
+        "description": "Local Development Server"
+      },
+      {
+        "url": "https://blogging-platform-backend-0eww.onrender.com/api",
+        "description": "Staging Server"
+      }
+    ],
+    "tags": [
+        {
+            "name": "AuthController",
+            "description": "Endpoints related to user management"
+        },
+        {
+            "name": "PostController",
+            "description": "Endpoints related to product management"
+        }
+    ],
+    "paths": {
+        "/posts":{
+            "get":{
+               "tags": ["PostController"],
+               "summary":"Retrieve All Posts",
+               "description":"Fetches a list of posts with their previews and details.",
+               "responses":{
+                  "200":{
+                     "description":"Success response for fetching posts",
+                     "content":{
+                        "application/json":{
+                           "schema":{
+                              "type":"object",
+                              "properties":{
+                                 "succeeded":{
+                                    "type":"boolean",
+                                    "example":true
+                                 },
+                                 "message":{
+                                    "type":"string",
+                                    "example":"Action was successful"
+                                 },
+                                 "statusCode":{
+                                    "type":"string",
+                                    "example":"200"
+                                 },
+                                 "resultData":{
+                                    "type":"array",
+                                    "items":{
+                                       "type":"object",
+                                       "properties":{
+                                          "postId":{
+                                             "type":"string",
+                                             "example":"675060c82e081845ca2afdb6"
+                                          },
+                                          "postPreview":{
+                                             "type":"string",
+                                             "example":"Fruits are important part of a meal. One should eat one per day I recommend. An apple a day keeps a "
+                                          },
+                                          "title":{
+                                             "type":"string",
+                                             "example":"Benefits of Fruits"
+                                          },
+                                          "authorId":{
+                                             "type":"string",
+                                             "example":"674704ebbcabf2df56333b9a"
+                                          },
+                                          "htmlContent":{
+                                             "type":"string",
+                                             "example":"<p>Fruits are important part of a meal. One should eat one per day I recommend. An apple a day keeps a doctor away. Cheers. This is for atlas.</p>\n"
+                                          }
+                                       }
+                                    }
+                                 }
+                              },
+                              "required":[
+                                 "succeeded",
+                                 "message",
+                                 "statusCode",
+                                 "resultData"
+                              ]
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+        },
+        "/posts/{id}": {
+            "get": {
+                "tags": ["PostController"],
+                "summary": "Retrieve a single post by ID",
+                "parameters": [
+                    {
+                    "in": "path",
+                    "name": "id",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                    "description": "A single blog post"
+                    }
+                }
+            }
+        },
+        "/register":{
+            "post":{
+                "tags": ["AuthController"],
+                "summary":"Register a new user",
+                "description":"Allows creating a new user with a name, email, password, and role.",
+                "requestBody":{
+                    "required":true,
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"object",
+                                "properties":{
+                                    "name":{
+                                        "type":"string",
+                                        "example":"John Doe"
+                                    },
+                                    "email":{
+                                        "type":"string",
+                                        "example":"johndoe@gmail.com"
+                                    },
+                                    "password":{
+                                        "type":"string",
+                                        "example":"StrongPassword"
+                                    },
+                                    "role":{
+                                        "type":"string",
+                                        "enum":[
+                                            "Admin",
+                                            "User"
+                                        ],
+                                        "example":"Admin"
+                                    }
+                                },
+                                "required":[
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses":{
+                    "200":{
+                        "description":"User successfully registered",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"object",
+                                    "properties":{
+                                        "message":{
+                                            "type":"string",
+                                            "example":"User registered successfully"
+                                        },
+                                        "userId":{
+                                            "type":"string",
+                                            "example":"62e259a4c3c54b1234567890"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400":{
+                        "description":"Invalid input",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"object",
+                                    "properties":{
+                                        "error":{
+                                            "type":"string",
+                                            "example":"Invalid email address"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
