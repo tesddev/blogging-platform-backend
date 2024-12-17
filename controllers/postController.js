@@ -2,6 +2,7 @@ const marked = require('marked');
 const Post = require('../models/post');
 const successStatusCode = process.env.successStatusCode || 200;
 const badRequestResponseCode = process.env.badRequestResponseCode || 400
+const Comment = require('../models/comment');
 
 const getPost = async (req, res) => {
     try {
@@ -9,10 +10,37 @@ const getPost = async (req, res) => {
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
+
+        // Fetch comments related to the post and populate user details
+        const comments = await Comment.find({ postId: post._id })
+                                      .populate('userId', 'name')
+                                      .select('content userId');
+
+        // Parse post content using 'marked'
         const htmlContent = marked.parse(post.content);
-        res.status(200).json({ title: post.title, content: htmlContent });
+
+        // Send response with post data and comments
+        res.status(200).json({ 
+            succeeded: true,
+            message: "Post details fetched successfully",
+            statusCode: successStatusCode,
+            resultData: {
+                title: post.title,
+                content: htmlContent,
+                comments: comments.map(comment => ({
+                    comentId: comment.id,
+                    content: comment.content,
+                    userName: comment.userId?.name || 'Anonymous'
+                }))
+            }
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Unable to fetch post', details: error.message });
+        res.status(500).json({
+            succeeded: false,
+            message: "Unable to fetch post",
+            statusCode: 500,
+            resultData: error.message,
+        });
     }
 };
 
