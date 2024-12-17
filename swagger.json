@@ -96,7 +96,7 @@
         "/posts/{id}": {
             "get": {
                 "tags": ["PostController"],
-                "summary": "Retrieve a single post by ID",
+                "summary": "Retrieve a single post details by ID",
                 "parameters": [
                     {
                     "in": "path",
@@ -109,7 +109,25 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "A single blog post"
+                        "description": "A single blog post",
+                        "content":{
+                            "application/json":{
+                                "example":{
+                                    "succeeded":true,
+                                    "message":"Post details fetched successfully",
+                                    "statusCode":200,
+                                    "resultData":{
+                                        "title": "Title of the post",
+                                        "content":"HTML string content",
+                                        "comments": {
+                                            "comentId": "Id of the comment",
+                                            "content":"Content of the comment",
+                                            "userName": "Commentator's name"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -463,6 +481,182 @@
                     }
                 }
             }
+        },
+        "/comments/{id}": {
+            "delete": {
+              "summary": "Delete a comment",
+              "description": "Deletes a comment by its ID.",
+              "tags": ["CommentController"],
+              "parameters": [
+                {
+                  "name": "id",
+                  "in": "path",
+                  "required": true,
+                  "description": "ID of the comment to delete",
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Comment deleted successfully",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "succeeded": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Comment deleted successfully"
+                          },
+                          "statusCode": {
+                            "type": "integer",
+                            "example": 200
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "404": {
+                  "description": "Comment not found",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "error": {
+                            "type": "string",
+                            "example": "Comment not found"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "500": {
+                  "description": "Internal server error",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "error": {
+                            "type": "string",
+                            "example": "Unable to delete comment"
+                          },
+                          "details": {
+                            "type": "string",
+                            "example": "Detailed error message"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        },
+        "/comments": {
+            "post": {
+              "tags": ["CommentController"],
+              "summary": "Create a new comment",
+              "description": "Allows a user to post a comment on a specific post.",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "description": "The content of the comment",
+                          "example": "Nice write-up. I am glad I read it!!"
+                        },
+                        "postId": {
+                          "type": "string",
+                          "description": "The ID of the post to comment on",
+                          "example": "6759ca55c4534b18eeb62447"
+                        }
+                      },
+                      "required": ["content", "postId"]
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Comment created successfully",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "succeeded": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Action was successful"
+                          },
+                          "statusCode": {
+                            "type": "integer",
+                            "example": 200
+                          },
+                          "resultData": {
+                            "type": "string",
+                            "example": "Comment added"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "description": "Bad request, missing or invalid parameters",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "error": {
+                            "type": "string",
+                            "example": "Invalid request body"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "500": {
+                  "description": "Internal server error",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "error": {
+                            "type": "string",
+                            "example": "Unable to create comment"
+                          },
+                          "details": {
+                            "type": "string",
+                            "example": "Detailed error message"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
         }
     },
     "components": {
@@ -499,7 +693,70 @@
                     }
                 },
                 "required": ["title", "content", "authorId"]
-            }
+            },
+            "Comment": {
+                "type": "object",
+                "required": ["content", "postId", "userId"],
+                "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "This is a comment"
+                },
+                "postId": {
+                    "type": "string",
+                    "format": "ObjectId",
+                    "description": "ID of the related post",
+                    "example": "60c72b2f5f1b2c6d88f5e123"
+                },
+                "userId": {
+                    "type": "string",
+                    "format": "ObjectId",
+                    "description": "ID of the user who created the comment",
+                    "example": "60c72b305f1b2c6d88f5e456"
+                }
+                }
+            },
+            "User": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Full name of the user",
+                    "example": "John Doe"
+                },
+                "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "User's unique email address",
+                    "example": "john.doe@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "description": "Hashed user password",
+                    "example": "hashed_password_here"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": ["Admin", "Author", "Reader"],
+                    "description": "Role assigned to the user",
+                    "example": "Reader"
+                },
+                "resetToken": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Password reset token",
+                    "example": "a4f63b8d5c1f4c0db02e3e01a4d5f3b8"
+                },
+                "resetTokenExpires": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": true,
+                    "description": "Expiration time for the password reset token",
+                    "example": "2024-12-17T23:59:59Z"
+                }
+                }
+            }              
         },
         "securitySchemes": {
             "BearerAuth": {
