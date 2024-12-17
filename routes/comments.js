@@ -1,6 +1,6 @@
 const express = require('express');
 const commentRouter = express.Router();
-const authenticateToken = require('../middlewares/auth');
+const { authenticateToken, isAuthorized } = require('../middlewares/auth');
 const authorizeRoles = require('../middlewares/role');
 const postComment = require('../controllers/commentController');
 
