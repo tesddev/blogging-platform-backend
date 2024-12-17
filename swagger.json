@@ -58,23 +58,23 @@
                                        "properties":{
                                           "postId":{
                                              "type":"string",
-                                             "example":"675060c82e081845ca2afdb6"
+                                             "example":"000000-post-id"
                                           },
                                           "postPreview":{
                                              "type":"string",
-                                             "example":"Fruits are important part of a meal. One should eat one per day I recommend. An apple a day keeps a "
+                                             "example":"Preview of post - first 100 characters "
                                           },
                                           "title":{
                                              "type":"string",
-                                             "example":"Benefits of Fruits"
+                                             "example":"Title of post"
                                           },
                                           "authorId":{
                                              "type":"string",
-                                             "example":"674704ebbcabf2df56333b9a"
+                                             "example":"author-id"
                                           },
                                           "htmlContent":{
                                              "type":"string",
-                                             "example":"<p>Fruits are important part of a meal. One should eat one per day I recommend. An apple a day keeps a doctor away. Cheers. This is for atlas.</p>\n"
+                                             "example":"<p>HTML content of post ......</p>\n"
                                           }
                                        }
                                     }
@@ -109,9 +109,72 @@
                 ],
                 "responses": {
                     "200": {
-                    "description": "A single blog post"
+                        "description": "A single blog post"
                     }
                 }
+            },
+            "put": {
+                "tags": ["PostController"],
+                "summary": "Update an existing post by ID",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "The updated data for the blog post",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Post"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Post successfully updated"
+                    },
+                    "404": {
+                        "description": "Post not found"
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["PostController"],
+                "summary": "Delete a blog post by ID",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Post successfully deleted"
+                    },
+                    "404": {
+                        "description": "Post not found"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/register":{
@@ -196,6 +259,259 @@
                     }
                 }
             }
+        },
+        "/login":{
+            "post":{
+                "tags": ["AuthController"],
+                "summary":"User login",
+                "description":"Logs in the user and returns a JWT token",
+                "operationId":"userLogin",
+                "requestBody":{
+                "required":true,
+                "content":{
+                    "application/json":{
+                        "schema":{
+                            "type":"object",
+                            "properties":{
+                            "email":{
+                                "type":"string",
+                                "example":"johndoe@gmail.com"
+                            },
+                            "password":{
+                                "type":"string",
+                                "example":"Password"
+                            }
+                            },
+                            "required":[
+                            "email",
+                            "password"
+                            ]
+                        }
+                    }
+                }
+                },
+                "responses":{
+                "200":{
+                    "description":"Successful login",
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                            "type":"object",
+                            "properties":{
+                                "token":{
+                                    "type":"string",
+                                    "example":"jwt token"
+                                }
+                            }
+                            }
+                        }
+                    }
+                },
+                "400":{
+                    "description":"Invalid email or password"
+                },
+                "500":{
+                    "description":"Server error"
+                }
+                }
+            }
+        },
+        "/request-password-reset":{
+            "post":{
+               "summary":"Request Password Reset",
+               "description":"Sends a password reset token to the user's email.",
+               "tags": ["AuthController"],
+               "requestBody":{
+                  "required":true,
+                  "content":{
+                     "application/json":{
+                        "schema":{
+                           "type":"object",
+                           "properties":{
+                              "email":{
+                                 "type":"string",
+                                 "format":"email",
+                                 "example":"user@example.com"
+                              }
+                           },
+                           "required":[
+                              "email"
+                           ]
+                        }
+                     }
+                  }
+               },
+               "responses":{
+                  "200":{
+                     "description":"Password reset email sent successfully.",
+                     "content":{
+                        "application/json":{
+                           "example":{
+                              "succeeded":true,
+                              "message":"Password reset email sent!",
+                              "statusCode":200,
+                              "resultData":true
+                           }
+                        }
+                     }
+                  },
+                  "404":{
+                     "description":"User not found.",
+                     "content":{
+                        "application/json":{
+                           "example":{
+                              "succeeded":false,
+                              "message":"User not found",
+                              "statusCode":404,
+                              "resultData":null
+                           }
+                        }
+                     }
+                  },
+                  "500":{
+                     "description":"Internal server error.",
+                     "content":{
+                        "application/json":{
+                           "example":{
+                              "succeeded":false,
+                              "message":"Error processing request",
+                              "statusCode":500,
+                              "resultData":"Internal server error message"
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+        },
+        "/reset-password/{token}":{
+            "post":{
+               "summary":"Reset Password",
+               "description":"Resets the user's password using the provided reset token.",
+               "tags": ["AuthController"],
+               "parameters":[
+                    {
+                        "name":"token",
+                        "in":"path",
+                        "required":true,
+                        "description":"Password reset token.",
+                        "schema":{
+                            "type":"string",
+                            "example":"example-reset-token-123456"
+                        }
+                    }
+                ],
+                "requestBody":{
+                    "required":true,
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type":"object",
+                                "properties":{
+                                    "password":{
+                                        "type":"string",
+                                        "format":"password",
+                                        "example":"NewSecurePassword123!"
+                                    }
+                                },
+                                "required":[
+                                    "password"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses":{
+                    "200":{
+                        "description":"Password reset successful.",
+                        "content":{
+                            "application/json":{
+                                "example":{
+                                    "succeeded":true,
+                                    "message":"Password reset successful.",
+                                    "statusCode":200,
+                                    "resultData":null
+                                }
+                            }
+                        }
+                    },
+                    "400":{
+                        "description":"Invalid or expired token.",
+                        "content":{
+                            "application/json":{
+                                "example":{
+                                    "succeeded":false,
+                                    "message":"Invalid or expired token.",
+                                    "statusCode":400,
+                                    "resultData":null
+                                }
+                            }
+                        }
+                    },
+                    "500":{
+                        "description":"Internal server error.",
+                        "content":{
+                            "application/json":{
+                                "example":{
+                                    "succeeded":false,
+                                    "message":"Error resetting password.",
+                                    "statusCode":500,
+                                    "resultData":"Internal server error message"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-    }
+    },
+    "components": {
+        "schemas": {
+            "Post": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "The title of the post"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The content of the post"
+                    },
+                    "authorId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The ID of the user who created the post"
+                    },
+                    "categories": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of categories the post belongs to"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Tags associated with the post"
+                    }
+                },
+                "required": ["title", "content", "authorId"]
+            }
+        },
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "BearerAuth": []
+        }
+    ]
 }
