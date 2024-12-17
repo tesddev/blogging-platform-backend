@@ -58,4 +58,45 @@ const createPost = async (req, res) => {
     }
 };
 
-module.exports = { getPost, createPost, getAllPosts };
+const editPost = async (req, res) => {
+    try {
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.id,
+            { ...req.body },
+            { new: true }
+        );
+
+        if (!updatedPost) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        res.status(200).json({
+            succeeded: true,
+            message: "Post updated successfully",
+            statusCode: 200,
+            resultData: updatedPost,
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Unable to update post', details: error.message });
+    }
+};
+
+const deletePost = async (req, res) => {
+    try {
+        const deletedPost = await Post.findByIdAndDelete(req.params.id);
+
+        if (!deletedPost) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        res.status(200).json({
+            succeeded: true,
+            message: "Post deleted successfully",
+            statusCode: 200,
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Unable to delete post', details: error.message });
+    }
+};
+
+module.exports = { getPost, createPost, getAllPosts, editPost, deletePost };
