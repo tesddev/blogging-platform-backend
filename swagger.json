@@ -562,7 +562,7 @@
               }
             }
         },
-        "/comments": {
+        "/postComment": {
             "post": {
               "tags": ["CommentController"],
               "summary": "Create a new comment",
