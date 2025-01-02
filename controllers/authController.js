@@ -67,7 +67,11 @@ const login = async (req, res) => {
         succeeded: true,
         message: "Login successful.",
         statusCode: 200,
-        resultData: token,
+        resultData: {
+            token: token,
+            userName: user.name,
+            role: user.role
+        }
     });
 };
 
