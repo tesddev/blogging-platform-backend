@@ -30,7 +30,7 @@ const isAuthorized = async (req, res, next) => {
             return res.status(404).json({ error: "Post not found" });
         }
 
-        if (post.authorId.toString() === req.user.id || req.user.role === 'admin') {
+        if (post.authorId.toString() === req.user.id || req.user.role === 'Admin') {
             next();
         } else {
             res.status(403).json({ error: "You are not authorized to perform this action" });
